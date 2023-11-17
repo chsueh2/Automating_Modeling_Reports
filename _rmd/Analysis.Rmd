@@ -1,0 +1,35 @@
+---
+title: "ST558 Porject 2 - Analysis on News Channel: `r params$channel`"
+author: "Bridget Knapp and Chien-Lan Hsueh"
+institute: Online Statistics Master Program, NCSU
+date: "`r Sys.Date()`"
+output:
+  github_document:  
+    html_preview: FALSE
+params:
+  channel: "lifestyle"
+  load_data: FALSE
+---
+
+```{r include=FALSE}
+path <- here::here("images", params$channel) %&% "/"
+if(!file.exists(path)) dir.create(path)
+knitr::opts_chunk$set(fig.path = path)
+```
+
+This analysis report focuses on new channel: ``r params$channel``:
+```{r}
+# subset by channel
+if(params$channel != "all"){
+  df_train_x <- df_train %>% filter(channel == params$channel)
+  df_test_x <- df_test %>% filter(channel == params$channel)
+}
+```
+
+# Summarizations
+```{r, child="part 3 - eda v2.Rmd"}
+```
+
+# Modeling
+```{r, child="part 4 - model.Rmd"}
+```

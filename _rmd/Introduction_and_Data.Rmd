@@ -1,0 +1,26 @@
+---
+title: "ST558 Porject 2 - Introduction and Data"
+author: "Bridget Knapp and Chien-Lan Hsueh"
+institute: Online Statistics Master Program, NCSU
+date: "`r Sys.Date()`"
+output:
+  github_document:  
+    html_preview: FALSE
+params:
+  channel: "lifestyle"
+  load_data: FALSE
+---
+
+```{r include=FALSE}
+path <- here::here("images", "intro") %&% "/"
+if(!file.exists(path)) dir.create(path)
+knitr::opts_chunk$set(fig.path = path)
+```
+
+# Introduction
+```{r, child="part 1 - introduction.Rmd"}
+```
+
+# Data
+```{r, child="part 2 - data.Rmd"}
+```

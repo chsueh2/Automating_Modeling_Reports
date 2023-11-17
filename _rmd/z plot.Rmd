@@ -1,0 +1,23 @@
+
+
+
+
+
+```{r}
+library(tidyverse)
+library(here)
+
+knitr::opts_chunk$set(fig.path = "../images/")
+
+df_c <- read_csv(here("output", "learnings.csv"))
+
+```
+
+```{r}
+df_c %>% ggplot(aes(learning_method, RMSE, color = channel)) +
+  geom_jitter() +
+  facet_grid(rows = vars(model)) +
+  theme(axis.text.x = element_text(angle = 45))
+
+```
+

@@ -1,0 +1,152 @@
+---
+title: "ST558 Porject 1: Part 3"
+author: "Bridget Knapp and Chien-Lan Hsueh"
+institute: Online Statistics Master Program, NCSU
+date: "`r Sys.Date()`"
+output:
+  html_notebook:
+    theme: cerulean
+    highlight: haddock
+    code_folding: none
+  html_document:
+    df_print: paged
+params:
+  channel: "lifestyle"
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.path = "./images/")
+```
+
+
+## Summarizations
+
+"part 2 - data.Rmd"
+
+
+```{r, include = FALSE}
+knitr::knit("part 2 - data.Rmd", output = tempfile())
+```
+
+
+
+```{r}
+# check balance - compare ecdf of train and test sets
+plot(ecdf(df_train$shares), col = "blue", main = "Empirical Cumulative Distribution", xlab = "shares")
+plot(ecdf(df_test$shares), col = "red", add = T)
+```
+
+
+```{r}
+# subset by channel
+df_train_x <- df_train %>% filter(channel == params$channel)
+df_train_x
+df_test_x <- df_test %>% filter(channel == params$channel)
+```
+
+# Exploratory Data Analysis
+
+After we have filtered our data for one channel, lets summarize all of the data. The table below gives us the sample size (N), mean (Mean), standard deviation (Std. Dev.), minimum (Min), 25th percentile (Pctl. 25), 75th percentile (Pctl. 75), and maximum (Max).
+
+```{r 8:29_7_7_2022,warning=FALSE,message=FALSE}
+library(vtable)
+st(df_train_x)
+```
+
+Next, lets learn more about our response variable: `shares`. Lets do a 5-number summary. It will show the minimum (Min.), first quartile (1st Qu.), median (Median), mean (Mean), third quartile (3rd Qu.), and maximum (Max.). This will help us get an idea about the overall spread of the `shares` data.
+
+```{r 8:15_7_8_2022}
+nrow(df_train_x)
+summary(df_train_x$shares)
+```
+
+Next, lets plot a histogram of the `shares` data so that we can visually see it's distribution. For example, we can determine if the distribution of `shares` is symmetric, skewed left, or skewed right.
+
+```{r 8:21_7_8_2022}
+df_train_x %>% 
+  ggplot(aes(x = shares)) + 
+  geom_histogram() +
+  labs(
+    title = paste0("Histogram: Distribution of Shares for ", params$channel),
+    y="Frequency",
+    x="Shares") +
+  coord_cartesian(xlim = c(0,100000))
+```
+
+Next, we'll create a box plot. Before we do that, let's make a binary version of the `shares` data. Using the median of the `shares` data, we will give entries with a number of shares >= the median a 1 and the rest a 0. I chose to use the median because it is not affected by outliers, which is an advantage when dealing with skewed distributions. This plot will show if the majority of shares is greater than or less than the median of the shares. If it's larger than the median, the box plot over the 1 should be larger and more spread out than the one over the 0. I did a log transformation on our data because it will make our skewed data more normal.
+
+```{r 8:49_7_8_2022}
+library(tidyverse)
+binary <- function(S){
+if(S>=median(df_train_x$shares,na.rm = TRUE)){
+A<-1
+return(A)
+}
+if(S<median(df_train_x$shares,na.rm = TRUE)){
+A<-0
+return(A)
+}
+}
+
+df_train_x$binary_shares <- as.numeric(sapply(df_train_x$shares, FUN=binary))
+ggplot(df_train_x, aes(x = factor(binary_shares), y = shares)) +
+geom_boxplot(fill = "grey") +
+  scale_y_log10() +
+  labs(x="Number of Shares (0: < median of shares, 1: >= median of shares)",
+       title=paste0("Boxplot: Are Number of Shares in ",params$channel," Greater than the Median?"),
+       y="Count") 
+```
+
+Now, let's summarize the rest of the numeric variables (i.e., not `channel`,`weekday`,`is_weekend` because they're factors). This will give the 5-number summary for all of the numeric variables in our data set. This can help us understand the distribution of each variable.
+
+```{r 9:08_7_8_2022}
+df_train_x %>% 
+  select(-c(channel,weekday,is_weekend)) %>% 
+  summary()
+```
+
+We can also visually inspect the distribution of each variable by making a histogram for each. We can look at each variable and see if it has a symmetric, skewed left, or skewed right distribution.
+
+```{r 9:18_7_8_2022}
+library(Hmisc)
+df_train_x %>% 
+  select(-c(channel,weekday,is_weekend)) %>%
+  hist.data.frame(mtitl=paste0("Histograms for all Numeric Variables in ",params$channel))
+```
+
+Now, we will make a correlation plot comparing all of our numeric variables. When we do our modeling, we're looking for correlations that are greater than 0.75 and less than -0.75. In the plot below, we are looking for the bright red and bright blue sections.
+
+```{r 8:10_7_7_2022,warning=FALSE,message=FALSE}
+df_train_x_v1 <- dplyr::select_if(df_train_x, is.numeric) #trying not to overwrite df_train_x 
+
+r <- cor(df_train_x_v1, use="complete.obs")
+library(ggplot2)
+library(ggcorrplot)
+ggcorrplot(r, 
+           hc.order = TRUE, 
+           type = "lower",
+           tl.cex = 6,
+           title = paste0("Correlation Plot for ",params$channel))
+```
+
+Now, lets look at the three variables we left out: `weekday`,`is_weekend`. We will start by making a summary table showing how many articles (or observations) where published on each weekday and the number of articles that were published on a weekend.
+
+```{r 9:47_7_8_2022}
+df_train_x %>% 
+  select(weekday, is_weekend) %>% 
+  summary()
+```
+Below is a box plot showing the number of shares for each weekday. I did a log transformation on our data because it will make our skewed data more normal. It will help us understand if there are certain days of the week where articles get more or less shares.
+
+```{r 10:00_7_8_2022}
+df_train_x %>% 
+  select(weekday,is_weekend,shares) %>% 
+  ggplot(aes(weekday, shares)) +
+geom_boxplot() +
+  scale_y_log10() +
+geom_jitter(width = 0.05) +
+labs(
+  title = paste0("Boxplots: Distribution of Shares in ",params$channel," for Each Weekday"),
+  x = "Weekday"
+)
+```

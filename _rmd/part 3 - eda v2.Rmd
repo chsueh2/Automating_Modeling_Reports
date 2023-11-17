@@ -1,0 +1,194 @@
+---
+title: 'ST558 Porject 1: Part 3'
+author: "Bridget Knapp and Chien-Lan Hsueh"
+institute: Online Statistics Master Program, NCSU
+date: "`r Sys.Date()`"
+output:
+  html_notebook:
+    theme: cerulean
+    highlight: haddock
+    code_folding: none
+params:
+  channel: "lifestyle"
+  load_data: TRUE
+---
+
+
+```{r, include=FALSE}
+if(params$load_data){
+  knitr::knit(here::here("_Rmd", "part 2 - data.Rmd"), output = tempfile())
+  
+  df_train_x <- df_train %>% filter(channel == params$channel)
+  df_test_x <- df_test %>% filter(channel == params$channel)
+}
+```
+
+
+
+## News Channel: ``r params$channel``
+
+In this section, a quick EDA will be done on the **training set** for news channel ``r params$channel``:
+
+- Overlook of the data set
+- Response variable
+- Categorical Predictors
+- Numeric Predictors
+
+
+### Overlook of the data set
+
+Verify the data sets only has data from ``r params$channel`` channel:
+```{r}
+table(df_train_x$channel, df_train_x$weekday)
+table(df_test_x$channel, df_test_x$weekday)
+```
+
+The tables below give quick summaries of all the numeric and categorical variables:
+```{r}
+# quick summaries of numeric and categorical variables
+skim(df_train_x)
+```
+
+### Response Variable
+
+Next, let's learn more about our response variable: `shares` with a 5-number summary. With a histogram, we can visually see it's distribution and determine if it is symmetric, skewed left, or skewed right.
+
+```{r histogram}
+# 5-number summary on shares
+summary(df_train_x$shares)
+
+# histogram on shares
+df_train_x %>% 
+  ggplot(aes(x = shares)) + 
+  geom_histogram(binwidth = 1000) +
+  coord_cartesian(xlim = c(0, 100000)) +
+  labs(
+    title = paste0("Histogram: Distribution of Shares for News Channel ", params$channel),
+    x="Shares",
+    y="Frequency")
+```
+
+### Categorical Predictors
+
+Despite the `channel` variable, there are two categorical variables `weekday`, `is_weekend`. A one-way contigency table shows how many articles were published on each weekday.
+
+```{r}
+df_train_x %>% 
+  select(weekday, is_weekend) %>% 
+  summary()
+```
+The following side-by-side box plots help us visualize the distributions of `shares` on each weekday.
+
+```{r boxplot}
+df_train_x %>% 
+  ggplot(aes(weekday, shares)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  geom_jitter(width = 0.05) +
+  labs(
+    title = paste0("Boxplots: Distribution of Shares in News Channel ", params$channel, " for Each Weekday"),
+    x = "Weekday")
+```
+
+### Numeric Predictors
+
+We have `r ncol(df_train_x %>% select_if(is.numeric))` numeric variables. To further investigate the relationship among these numeric variables, we check their correlation by making pair-wise correlation plots. 
+
+```{r cor, warning=FALSE, message=FALSE}
+ggcorrplot(
+  cor(select_if(df_train_x, is.numeric), use = "complete.obs"), 
+  hc.order = TRUE, 
+  type = "lower",
+  tl.cex = 6,
+  title = paste0("Correlation Plot for News Channel ", params$channel))
+```
+
+Below, we use scatter plots to inspect the relationship between the response variable `shares` and various numeric variables in related groups:
+
+- `shares` vs. token-related variables
+- `shares` vs. numbers of links, keyword, images, videos
+- `shares` vs. keyword-related metrics
+- `shares` vs. tone polarity metrics
+- `shares` vs. title-related metrics
+
+#### `shares` vs. Token-related Variables
+```{r scatter1}
+# scatter plots: shares vs. token-related variables
+df_train_x %>% 
+  select(shares, starts_with("n_"), contains("token")) %>% 
+  pivot_longer(
+    cols = -c(shares),
+    names_to = "token_metric",
+    values_to = "number_of_tokens") %>% 
+  ggplot(aes(number_of_tokens, shares)) +
+  geom_point() +
+  facet_wrap(vars(token_metric), scales = "free") +
+  ggtitle("Shares vs. Token-related Variables")
+```
+
+#### `shares` vs. numbers of links, keywords, images and videos
+```{r scatter2}
+# scatter plots: shares vs. numbers of links, keywords, images and videos
+df_train_x %>% 
+  select(shares, starts_with("num_"), starts_with("self_reference")) %>% 
+  pivot_longer(
+    cols = -c(shares),
+    names_to = "number_metric",
+    values_to = "number_of_links_keywords_images_videos") %>% 
+  ggplot(aes(number_of_links_keywords_images_videos, shares)) +
+  geom_point() +
+  facet_wrap(vars(number_metric), scales = "free") +
+  ggtitle("Shares vs. Numbers of Links, Keywords, Images and Videos")
+```
+
+
+#### `shares` vs. Keyword-related Metrics
+```{r scatter3}
+# scatter plots: shares vs. numbers of links, keywords, images and videos
+df_train_x %>% 
+  select(shares, starts_with("kw_")) %>% 
+  pivot_longer(
+    cols = -c(shares),
+    names_to = "number_metric",
+    values_to = "keyword_related_metric") %>% 
+  ggplot(aes(keyword_related_metric, shares)) +
+  geom_point() +
+  facet_wrap(vars(number_metric), scales = "free") +
+  ggtitle("Shares vs. Keyword-related Metrics")
+```
+
+#### `shares` vs. Word Polarity Metrics
+```{r scatter4}
+# scatter plots: shares vs. numbers of links, keywords, images and videos
+df_train_x %>% 
+  select(
+    shares, 
+    contains("subjectivity"), 
+    contains("polarity"), 
+    contains("positive"), 
+    contains("negative"),
+    -contains("title")) %>% 
+  pivot_longer(
+    cols = -c(shares),
+    names_to = "number_metric",
+    values_to = "tone_polarity") %>% 
+  ggplot(aes(tone_polarity, shares)) +
+  geom_point() +
+  facet_wrap(vars(number_metric), scales = "free") +
+  ggtitle("Shares vs. Word Polarity Metrics")
+```
+
+#### `shares` vs. Title-related Metrics
+```{r scatter5}
+# scatter plots: shares vs. numbers of links, keywords, images and videos
+df_train_x %>% 
+  select(shares, contains("title")) %>% 
+  pivot_longer(
+    cols = -c(shares),
+    names_to = "number_metric",
+    values_to = "title_related_metric") %>% 
+  ggplot(aes(title_related_metric, shares)) +
+  geom_point() +
+  facet_wrap(vars(number_metric), scales = "free") +
+  ggtitle("Shares vs. Title-related Metrics")
+```
