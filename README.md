@@ -4,10 +4,11 @@ Train models with cross validation and create automatic reports for summaries an
 
 Key features:
 
-- (Nested) R Markdown with YAML Parameters
-- Linear Regression Model
-- Random Forests Model
-- Boosted Tree Model
+- Automation of Analysis Reports using R Markdown with YAML Parameters
+- Supervised Learning
+  - Linear Regression
+  - Random Forests
+  - Boosted Tree
 - Cross Validation
 - Model Selection
 
