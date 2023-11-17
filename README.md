@@ -30,14 +30,14 @@ R packages used:
 
 ## Project Report
 
-- [Introduction and Data Preparation](./output/Introduction_and_Data.html)
-- [Analysis on Entertainment News Channel](./output/Analysis_on_Entertainment.html)
-- [Analysis on Businiss News Channel](./output/Analysis_on_Bus.html)
-- [Analysis on Lifestyle News Channel](./output/Analysis_on_Lifestyle.html)
-- [Analysis on Misc News Channel](./output/Analysis_on_Misc.html)
-- [Analysis on Social Media News Channel](./output/Analysis_on_Socmed.html)
-- [Analysis on Technology News Channel](./output/Analysis_on_Tech.html)
-- [Analysis on World News Channel](./output/Analysis_on_World.html)
+- [Introduction and Data Preparation](./output/Introduction_and_Data.md)
+- [Analysis on Entertainment News Channel](./output/Analysis_on_Entertainment.md)
+- [Analysis on Businiss News Channel](./output/Analysis_on_Bus.md)
+- [Analysis on Lifestyle News Channel](./output/Analysis_on_Lifestyle.md)
+- [Analysis on Misc News Channel](./output/Analysis_on_Misc.md)
+- [Analysis on Social Media News Channel](./output/Analysis_on_Socmed.md)
+- [Analysis on Technology News Channel](./output/Analysis_on_Tech.md)
+- [Analysis on World News Channel](./output/Analysis_on_World.md)
 
 The analysis results with all theoretical backgrounds and math derivations are included.
 
