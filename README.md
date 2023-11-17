@@ -1,10 +1,10 @@
-# Automating_Modeling_Reports
+# Automating Machine Learning Reports
 
-Train models with cross validation and create automatic reports for summaries and predictions.
+Train supervised learning models with cross validation and automate report generation for summaries and predictions. 
 
 Key features:
 
-- Automation of Analysis Reports using R Markdown with YAML Parameters
+- Automation of Report Generation using R Markdown with YAML Parameters
 - Supervised Learning
   - Linear Regression
   - Random Forests
@@ -45,7 +45,7 @@ Chien-Lan Hsueh (chienlan.hsueh at gmail.com)
 
 ## Overview and Project Goal
 
-The purpose of this study is to summarize the data and to predict the number of shares based on chosen aspects of interest.
+The purpose of this study is to summarize the data and to predict the number of shares based on chosen aspects of interest. Several selected supervised learning algorithms are then used for prediction. The reports for each new channle are gernerated automatically.
 
 ## Data Source: Online News Popularity
 This project is to study the [Online News Popularity data set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) and create model for the predictions of the number of shares on a new article.
